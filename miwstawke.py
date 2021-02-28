@@ -226,7 +226,7 @@ def do_the_thing(last_time: dt.datetime, done: List[dt.datetime]):
     articles  = get_articles(last_time, done)
 
     narticles = len(articles)
-    time_mod = (3600 / math.sqrt(narticles)*narticles)
+    time_mod = (1800 / min(5, math.sqrt(narticles)*narticles))
 
     try:
         for headline in tqdm(articles, desc="Tweeting... "):
