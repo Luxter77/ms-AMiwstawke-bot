@@ -37,6 +37,7 @@ import unicodedata
 import contextlib
 import tweepy
 import time
+import math
 import pytz
 import sys
 import os
@@ -86,7 +87,7 @@ def owo(victim: str, out: str = ''):
 
 
 def tiny(url: str) -> str:
-    with contextlib.closing(urlopen('http://tinyurl.com/api-create.php?' + urlencode({'url':url}))) as response:                       
+    with contextlib.closing(urlopen('http://tinyurl.com/api-create.php?' + urlencode({'url':url}))) as response:
         return response.read().decode('utf-8 ')
 
 
@@ -123,7 +124,7 @@ def get_lanacion(last_time: dt.datetime, done: List[dt.datetime]) -> Generator[d
         art_time = du.parser.parse(url.lastmod.text)
         if(art_time.date() == dt.date.today()) and (art_time > last_time) and not(art_time in done):
             #if(rd.random() < .85):
-            #    continue # 50% probability of not tweeting the ting 
+            #    continue # 50% probability of not tweeting the ting
             try:
                 article = get_attrs(bs4(req.get(url.loc.text).content, "html.parser"))
                 article['url']  = tiny(url.loc.text)
@@ -139,7 +140,7 @@ def get_ultimahora(last_time: dt.datetime, done: List[dt.datetime]) -> Generator
         art_time = du.parser.parse(url.lastmod.text)
         if(art_time.date() == dt.date.today()) and (art_time > last_time) and not(art_time in done):
             #if(rd.random() < .85):
-            #    continue # 85% probability of not tweeting the ting 
+            #    continue # 85% probability of not tweeting the ting
             try:
                 article = get_attrs(bs4(req.get(url.loc.text).content, "html.parser"))
                 article['url']  = tiny(url.loc.text)
@@ -158,7 +159,7 @@ def get_abc(last_time: dt.datetime, done: List[dt.datetime]) -> Generator[dict, 
         art_time = du.parser.parse(url.lastmod.text)
         if(art_time.date() == dt.date.today()) and (art_time > last_time) and not(art_time in done):
             if(rd.random() < .85):
-                continue # 85% probability of not tweeting the ting 
+                continue # 85% probability of not tweeting the ting
             try:
                 article = get_attrs(bs4(req.get(url.loc.text).content, "html.parser"))
                 article['url']  = tiny(url.loc.text)
@@ -198,9 +199,8 @@ def get_articles(last_time: dt.datetime, done: List[dt.datetime], _wait: bool = 
             abc        = list(get_abc(last_time, done))
             latancion  = list(get_lanacion(last_time, done))
             ip         = list(get_ip(last_time, done))
-            
-            articles = abc + latancion + ip + ultimahora
-            rd.shuffle(articles)
+
+            articles = (abc + latancion + ip + ultimahora)
             
             assert len(articles) != 0
             
@@ -208,13 +208,15 @@ def get_articles(last_time: dt.datetime, done: List[dt.datetime], _wait: bool = 
         except AssertionError:
             tqdm.write(' There are no news! '.center(columns(), '*'))
             wait_for(1800)
+
+    articles = sorted(articles, key=lambda k: k['date'])
     
     return(articles)
 
 
 def wait_for(t: float):
-	for _ in tqdm(range(100), desc=f'Waiting for ~{str(int(t))}s', leave=False):
-	    time.sleep(t / 100)
+    for _ in tqdm(range(100), desc=f'Waiting for ~{str(int(t))}s', leave=False):
+        time.sleep(t / 100)
 
 
 def do_the_thing(last_time: dt.datetime, done: List[dt.datetime]):
@@ -223,9 +225,8 @@ def do_the_thing(last_time: dt.datetime, done: List[dt.datetime]):
 
     articles  = get_articles(last_time, done)
 
-    last_time = pytz.utc.localize(dt.datetime.now())
-
-    time_mod  = (1800 / len(articles))
+    narticles = len(articles)
+    time_mod = (3600 / math.sqrt(narticles)*narticles)
 
     try:
         for headline in tqdm(articles, desc="Tweeting... "):
@@ -244,6 +245,7 @@ def do_the_thing(last_time: dt.datetime, done: List[dt.datetime]):
                 tqdm.write(head.center(columns(), ' '))
                 
                 done.append(headline['date'])
+                saveprogress(headline['date'], done)
             except tweepy.TweepError as te:
                 if  (te.api_code == 187): # You already tweeted that
                     done.append(headline['date'])
@@ -258,7 +260,7 @@ def do_the_thing(last_time: dt.datetime, done: List[dt.datetime]):
                 raise
             wait_for(time_mod)
     except KeyboardInterrupt:
-        saveprogress(last_time, done)
+        saveprogress(headline['date'], done)
         raise
     return(this_time, done)
 
@@ -278,10 +280,14 @@ global done
 
 last_time, done = loadprogress()
 
-def main():
+def main(ilast_time: dt.datetime = False):
     # you guessed right, it's me
-    global last_time
     global done
+    if not(bool(ilast_time)):
+        global last_time
+    else:
+        last_time = ilast_time
+
     try:
         while True:
             saveprogress(last_time, done)
@@ -293,4 +299,4 @@ def main():
         raise # print(e)
 
 if __name__ == '__main__':
-    main()
+    main(last_time)
