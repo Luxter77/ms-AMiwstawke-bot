@@ -3,3 +3,4 @@ tqdm==4.51.0
 tweepy==3.8.0
 uwuify==1.0.1
 pytz==2019.3
+ipython
