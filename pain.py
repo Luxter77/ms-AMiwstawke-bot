@@ -17,7 +17,7 @@
 #    Por que hice esto
 #
 
-from miwstawke import main
+from miwstawke.miwstawke import main
 
 import pytz
 import dateutil as du
