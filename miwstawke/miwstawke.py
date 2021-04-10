@@ -207,7 +207,7 @@ def get_articles(last_time: dt.datetime, done: List[dt.datetime], _wait: bool = 
             _wait = False
         except AssertionError:
             tqdm.write(' There are no news! '.center(columns(), '*'))
-            wait_for(1800)
+            wait_for(1000)
 
     articles = sorted(articles, key=lambda k: k['date'])
     
@@ -215,9 +215,11 @@ def get_articles(last_time: dt.datetime, done: List[dt.datetime], _wait: bool = 
 
 
 def wait_for(t: float):
-    for _ in tqdm(range(100), desc=f'Waiting for ~{str(int(t))}s', leave=False):
-        time.sleep(t / 100)
-
+    try:
+        for _ in tqdm(range(100), desc=f'Waiting for ~{str(int(t))}s', leave=False):
+            time.sleep(t / 100)
+    except KeyboardInterrupt:
+        pass  # let us continue
 
 def do_the_thing(last_time: dt.datetime, done: List[dt.datetime]):
 
