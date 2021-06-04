@@ -43,8 +43,11 @@ import sys
 import os
 
 
-from secrets import api_token, user
-
+try:
+    from .secrets import api_token, user
+except ImportError:
+    print('You need to set the twitter secrets!')
+    raise
 
 def loadprogress() -> dt.datetime: # Try to load last saved progress, else start from scratch
     try:
