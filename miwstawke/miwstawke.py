@@ -43,11 +43,10 @@ import pytz
 import sys
 import os
 
-CHRISTIANSERVER: bool = (os.environ.get('CHRISTIANSERVER', "").lower() in ('true', '1'))
-ISDOCKER:        bool = (os.environ.get('ISDOCKER', "").lower() in ('true', '1'))
+
 
 try:
-    from .secrets import api_token, user
+    from .secrets import api_token, user, CHRISTIANSERVER, ISDOCKER 
 except ImportError:
     print('You need to set the twitter secrets!')
     raise
