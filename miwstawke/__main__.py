@@ -37,6 +37,8 @@ if __name__ == '__main__':
         main()
     elif(sys.argv[1] == 'now'):
         main(pytz.utc.localize(dt.datetime.now()))
+    elif(os.envirom.get('ISDOCKER', "").lower() in ('true', '1')):
+        main(pytz.utc.localize(dt.datetime.now() - dt.deltatime(hours=1)))
     else:
         a = safelist(sys.argv[1:])
         main(pytz.utc.localize(dt.datetime(

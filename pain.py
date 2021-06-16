@@ -32,10 +32,10 @@ class safelist(list):
             return(0)
 
 if __name__ == '__main__':
-
+    christian = True
     if(len(sys.argv) < 3):
         main()
-    elif(sys.argv[1] == 'now'):
+    elif('now' in sys.argv[1:]):
         main(pytz.utc.localize(dt.datetime.now()))
     else:
         a = safelist(sys.argv[1:])
