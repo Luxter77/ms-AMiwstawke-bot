@@ -226,7 +226,7 @@ def get_articles(last_time: dt.datetime, done: List[dt.datetime], _wait: bool = 
 
             _wait = False
         except AssertionError:
-            print(' There are no news! '.center(columns(), '*'))
+            print(' There are no news! '.center(columns(), '*'), end='\n\n')
             wait_for(1000)
 
     articles = sorted(articles, key=lambda k: k['date'])
