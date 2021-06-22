@@ -43,8 +43,6 @@ import pytz
 import sys
 import os
 
-
-
 try:
     from .secrets import api_token, user, CHRISTIANSERVER, ISDOCKER 
 except ImportError:
